@@ -6,19 +6,25 @@
 
 # SwiftUI Backports
 
-Introducing a collection of SwiftUI backports to make your iOS development easier.
+Use modern SwiftUI APIs while still supporting older Apple platforms.
 
-Many backports support iOS 13+ but where UIKIt features were introduced in later versions, the same will be applicable to these backports, to keep parity with UIKit.
+SwiftUIBackports mirrors Apple's SwiftUI API names, shapes, behavior, documentation, and availability where practical. This keeps app code familiar today, and easy to migrate away from once your deployment target reaches the native API.
 
-In some cases, I've also included additional APIs that bring more features to your SwiftUI development.
+Backports are discovered through `.backport`, the `Backport` namespace, or `backport`-prefixed environment values. The package also includes a machine-readable index and agent skill to help developers and coding agents find the right compatibility API quickly.
 
-> Note, **all** backports will be API-matching to Apple's official APIs, any additional features will be provided separately.
+Additional APIs, when present, are kept separate from Apple API-matching backports.
 
-All backports are fully documented, in most cases using Apple's own documentation for consistency. Please refer to the header docs or Apple's original documentation for more details.
+This repo can also serve as a reference for building practical SwiftUI backports with minimal hacks.
 
-There is also a [Demo project](https://github.com/shaps80/SwiftUIBackportsDemo) available where you can see full demonstrations of all backports and additional features, including reference code to help you get started.
+> [!CAUTION]
+> From v27, SwiftUIBackports will require iOS 15+, macOS 12+, tvOS 15+, and watchOS 8+. If you need to support older platform versions, remain on 26.x.
 
-> Lastly, I hope this repo also serves as a great resource for _how_ you can backport effectively with minimal hacks 👍
+> [!NOTE]
+> Using an agent? Install the bundled discovery skill so coding agents can find available backports automatically:
+>
+> ```sh
+> npx skills add shaps80/SwiftUIBackports
+> ```
 
 ## Sponsor
 
@@ -30,89 +36,55 @@ You can also give me a follow and a 'thanks' anytime.
 
 ## Usage
 
-The library adopts a backport design by [Dave DeLong](https://davedelong.com/blog/2021/10/09/simplifying-backwards-compatibility-in-swift/) that makes use of a single type to improve discoverability and maintainability when the time comes to remove your backport implementations, in favour of official APIs.
+SwiftUIBackports mirrors Apple's SwiftUI APIs where practical, while keeping backported APIs easy to find and remove once your deployment target reaches the native API.
 
-Backports of pure types, can easily be discovered under the `Backport` namespace. Similarly, modifiers are discoverable under the `.backport` namespace.
-
-> Unfortunately `Environment` backports cannot be access this way, in those cases the Apple API values will be prefixed with `backport` to simplify discovery.
-
-Types:
+View modifiers are available from `.backport`:
 
 ```swift
-@Backport.AppStorage("filter-enabled")
-private var filterEnabled: Bool = false
+sheetContent
+    .backport.presentationDetents([.medium, .large])
 ```
 
-Modifier:
+Backported types are usually available from the `Backport` namespace:
 
 ```swift
-Button("Show Prompt") {
-    showPrompt = true
-}
-.sheet(isPresented: $showPrompt) {
-    Prompt()
-        .backport.presentationDetents([.medium, .large])
-}
+Backport.LabeledContent("", value: 0)
 ```
 
-Environment:
+If the compiler needs the fully-qualified namespace, use `Backport<Any>`:
 
 ```swift
-@Environment(\.backportRefresh) private var refreshAction
+Backport<Any>.LabeledContent("", value: 0)
+```
+
+Environment backports use a `backport` prefix:
+
+```swift
+@Environment(\.backportRequestReview) private var requestReview
 ```
 
 ## Backports
 
-**SwiftUI**
+The supported backports are indexed in:
 
-- `AsyncImage`
-- `AppStorage`
-- `background` – ViewBuilder API
-- `DismissAction`
-- `DynamicTypeSize`
-– `Label`
-– `LabeledContent`
-- `NavigationDestination` – uses a standard NavigationView
-- `navigationTitle` – newer API
-- `overlay` – ViewBuilder API
-- `onChange`
-- `openURL`
-- `ProgressView`
-- `presentationDetents`
-- `presentationDragIndicator`
-- `quicklookPreview`
-- `requestReview`
-- `Refreshable` – includes pull-to-refresh 
-- `ScaledMetric`
-- `ShareLink`
-- `StateObject`
-- `scrollDisabled`
-- `scrollDismissesKeyboard`
-- `scrollIndicators`
-- `Section(_ header:)`
-- `task` – async/await modifier
-
-**UIKit**
-
-- `UIHostingConfiguration` – simplifies embedding SwiftUI in `UICollectionViewCell` and `UITableViewCell`
-
-## Extras
-
-**Modal Presentations**
-
-Adding this to your presented view, you can use the provided closure to present an `ActionSheet` to a user when they attempt to dismiss interactively. You can also use this to disable interactive dismissals entirely.
-
-```swift
-presentation(isModal: true) { /* attempt */ }
+```text
+skills/swiftui-backports/references/Backports.jsonl
 ```
 
-**FittingGeometryReader**
+The line-oriented index lists implemented backports, their kind, source location, and platform availability. Prefer this index over static README examples, which get stale quickly.
 
-A custom `GeometryReader` implementation that correctly auto-sizes itself to its content. This is useful in many cases where you need a `GeometryReader` but don't want it to implicitly take up its parent View's bounds.
+This repository also includes an agent skill:
 
-**FittingScrollView**
+```text
+skills/swiftui-backports/SKILL.md
+```
 
-A custom `ScrollView` that respects `Spacer`'s when the content is not scrollable. This is useful when you need to place a view at the edges of your scrollview while its content is small enough to not require scrolling. Another great use case is vertically centered content that becomes `top` aligned once the content requires scrolling.
+Use that skill when working in an app that targets older Apple OS versions, or when a compiler availability error blocks use of a newer SwiftUI API. The skill tells agents to:
+
+- check the project deployment target
+- search the bundled backport index
+- prefer native SwiftUI when the deployment target is new enough
+- use `.backport`, `Backport`, or `backport` environment keys when a matching backport exists
 
 ## Installation
 

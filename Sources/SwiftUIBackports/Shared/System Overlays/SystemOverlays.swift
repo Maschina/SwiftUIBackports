@@ -30,14 +30,14 @@ public extension Backport where Wrapped: View {
     ///
     /// - Parameter visibility: A value that indicates the visibility of the
     /// non-transient system views overlaying the app.
-    func persistentSystemOverlays(_ visibility: Backport<Any>.Visibility) -> some View {
+    func persistentSystemOverlays(_ visibility: Visibility) -> some View {
         wrapped.preference(key: PersistentSystemOverlaysPreferenceKey.self, value: visibility)
     }
 }
 
 private struct PersistentSystemOverlaysPreferenceKey: PreferenceKey {
-    typealias Value = Backport<Any>.Visibility
-    static var defaultValue: Value = .automatic
+    typealias Value = Visibility
+    static let defaultValue: Value = .automatic
     static func reduce(value: inout Value, nextValue: () -> Value) {
         value = nextValue()
     }

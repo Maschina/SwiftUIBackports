@@ -29,14 +29,12 @@ public struct DefaultShareLinkLabel: View {
                 Image(systemName: Self.shareIcon)
             }
         } else {
-            Backport.Label {
+            Label {
                 text
             } icon: {
                 #if os(macOS)
                 // no icon on earlier macOS versions
-                if #available(macOS 11, *) {
-                    Image(systemName: Self.shareIcon)
-                }
+                Image(systemName: Self.shareIcon)
                 #else
                 Image(systemName: Self.shareIcon)
                 #endif
